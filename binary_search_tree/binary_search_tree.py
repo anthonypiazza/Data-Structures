@@ -186,6 +186,7 @@ class BinarySearchTree:
         queue = Queue()
        
         queue.enqueue(node)
+
         while queue.storage.length > 0:
             node = queue.dequeue()
             if node.left is not None:
@@ -197,13 +198,20 @@ class BinarySearchTree:
     # Print the value of every node, starting with the given node,
     # in an iterative depth first traversal
     def dft_print(self, node):
-        while self.left or self.right:
-            print(f"Self Value: {self.value}") 
-            if self.left:
-                self = self.left
-            elif self.right:
-                self = self.right
 
+        stack = Stack()
+
+        stack.push(node)
+        
+        while stack.len() > 0:
+            node = stack.pop()
+            # print(f"POpped: {stack.pop()}")
+
+            if node.left is not None:
+                stack.push(node.left)
+            if node.right is not None:
+                stack.push(node.right)
+            print(node.value)
 
     # STRETCH Goals -------------------------
     # Note: Research may be required
