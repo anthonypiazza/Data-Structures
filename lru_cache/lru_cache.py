@@ -53,59 +53,52 @@ class LRUCache:
         # keeps track of the max number of nodes it can hold
         self.limit = limit
 
-        # the current number of nodes it is holding - self.storage.length
+        # the current number of nodes it is holding
+        self.size = 0
+        
         # a doubly-linked list that holds the key-value entries in the correct order
-        self.storage = DoublyLinkedList()
+        self.order = DoublyLinkedList()
         
         # storage dict that provides fast access to every node stored in the cache
-        self.cache = {}
+        self.storage = dict()
+        
+        
 
 
     def get(self, key):
         
-        value = None 
-
-        for k in self.cache:
-            if key == k:
-                # Retrieves the value associated with the given key
-                value = self.cache[key] 
-        # print(f"Key: {key}, Value: {value}")
-
-        # needs to move the key-value pair to the end of the order
-        # such that the pair is considered most-recently used.
-        self.storage.delete(value)
-        self.storage.add_to_head(value)
-        
-        # None if the key-value pair doesn't exist in the cache
-        if value == None:
-            return None
-        # Returns the value associated with the key
+        # Retrieves the value associated with the given key
+        if key in self.storage:
+            node = self.storage[key]
+            # needs to move the key-value pair to the end of the order
+            # such that the pair is considered most-recently used.
+            self.order.move_to_end(node)
+            # Returns the value associated with the key
+            return node.value[1]
         else:
-            return value
+            # Return None if the key-value pair doesn't exist in the cache
+            return None
+
 
     def set(self, key, value):
-        if not value:
-            return
         
-        else:
-            # If the cache is already at max capacity.
-            if self.storage.length == self.limit:
-                #oldest entry in the cache needs to be removed
-                self.storage.remove_from_tail()
-                self.storage.add_to_head(value)
-                # Adds the given key-value pair to the cache.
-                self.cache[key] = value
-            
-            # if key already exists in the cache
-            for k in self.cache:
-                if key == k:
-                    # overwrite the old value associated with the key with the newly-specified value
-                    self.cache[key] = value 
-            
-            # Adds the given key-value pair to the cache.
-            self.cache[key] = value
-            # newly-added pair should be considered the most-recently used entry in the cache
-            self.storage.add_to_head(value)
-           
-            
-        print(self.cache)
+        # if key already exists in the cache
+        if key in self.storage:
+            # overwrite the old value associated with the key with the newly-specified value
+            node = self.storage[key]
+            node.value = (key, value)
+            self.order.move_to_end(node)
+            return
+
+        # If the cache is already at max capacity.
+        if self.size == self.limit:
+            #oldest entry in the cache needs to be removed
+            del self.storage[self.order.head.value[0]]
+            self.order.remove_from_head()
+            self.size += 1
+
+        # Adds the given key-value pair to the cache.
+        # newly-added pair should be considered the most-recently used entry in the cache
+        self.order.add_to_tail((key, value))
+        self.storage[key] = self.order.tail
+        self.size += 1
